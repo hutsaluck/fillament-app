@@ -29,16 +29,25 @@ class ProductResource extends Resource
     {
         return $form
             ->schema( [
-                Forms\Components\TextInput::make( 'name' )
-                    ->required(),
-                Forms\Components\TextInput::make( 'price' )
-                    ->required()
-                    ->rule( 'numeric' ),
-                Forms\Components\Radio::make( 'status' )
-                    ->options( self::$statuses ),
-                Forms\Components\Select::make( 'category_id' )
-                    ->relationship( 'category', 'name' ),
-            ] );
+                Forms\Components\Wizard::make([
+                    Forms\Components\Wizard\Step::make('Main data')
+                        ->schema([
+                            Forms\Components\TextInput::make('name')
+                                ->required()
+                                ->unique(ignoreRecord: true),
+                            Forms\Components\TextInput::make('price')
+                                ->required(),
+                        ]),
+                    Forms\Components\Wizard\Step::make('Additional data')
+                        ->schema([
+                            Forms\Components\Radio::make('status')
+                                ->options(self::$statuses),
+                            Forms\Components\Select::make('category_id')
+                                ->relationship('category', 'name'),
+                        ]),
+                ])
+            ] )
+            ->columns(1);
     }
 
     public static function table( Table $table ): Table

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -49,12 +50,31 @@ class OrderResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('Change is completed')
+                    ->icon('heroicon-o-check-badge')
+                    ->fillForm(function (Order $order) {
+                        return ['is_completed' => $order->is_completed];
+                    })
+                    ->form([
+                        Forms\Components\Checkbox::make('is_completed'),
+                    ])
+                    ->action(function (Order $order, array $data): void {
+                        $order->update(['is_completed' => $data['is_completed']]);
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('Mark as Completed')
+                        ->icon('heroicon-o-check-badge')
+                        ->requiresConfirmation()
+                        ->action(fn (Collection $records) => $records->each->update(['is_completed' => true]))
+                        ->deselectRecordsAfterCompletion()
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('New Order')
+                    ->url(fn (): string => OrderResource::getUrl('create')),
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

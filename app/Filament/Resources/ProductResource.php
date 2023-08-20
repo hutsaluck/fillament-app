@@ -66,7 +66,9 @@ class ProductResource extends Resource
                     ->getStateUsing( function ( Product $record ): float {
                         return $record->price / 100;
                     } ),
-                Tables\Columns\ToggleColumn::make('is_active'),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->onColor('success') // default value: "primary"
+                    ->offColor('danger'), // default value: "gray",
                 Tables\Columns\SelectColumn::make( 'status' )
                     ->options(self::$statuses),
                 Tables\Columns\TextColumn::make( 'category.name' ),

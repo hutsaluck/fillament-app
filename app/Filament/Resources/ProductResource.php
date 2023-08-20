@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use \Filament\Infolists\Infolist;
+use \Filament\Infolists\Components\TextEntry;
 
 class ProductResource extends Resource
 {
@@ -110,6 +112,7 @@ class ProductResource extends Resource
             ], Tables\Enums\FiltersLayout::AboveContent )
             ->filtersFormColumns( 4 )
             ->actions( [
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ] )
@@ -136,6 +139,7 @@ class ProductResource extends Resource
             'index'  => Pages\ListProducts::route( '/' ),
             'create' => Pages\CreateProduct::route( '/create' ),
             'edit'   => Pages\EditProduct::route( '/{record}/edit' ),
+            'view' => Pages\ViewProduct::route('/{record}'),
         ];
     }
 
@@ -143,4 +147,48 @@ class ProductResource extends Resource
     {
         return __('Products');
     }
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make()
+                    ->schema([
+                        \Filament\Infolists\Components\Split::make([
+                            \Filament\Infolists\Components\Grid::make(2)
+                                ->schema([
+                                    \Filament\Infolists\Components\Group::make([
+                                        \Filament\Infolists\Components\TextEntry::make('name'),
+                                        \Filament\Infolists\Components\TextEntry::make('price')
+                                            ->money( 'usd' )
+                                            ->getStateUsing( function ( Product $record ): float {
+                                                return $record->price / 100;
+                                            } ),
+                                        \Filament\Infolists\Components\TextEntry::make('created_at')
+                                            ->badge()
+                                            ->date()
+                                            ->color('success'),
+                                    ]),
+                                    \Filament\Infolists\Components\Group::make([
+                                        \Filament\Infolists\Components\TextEntry::make('status'),
+                                        \Filament\Infolists\Components\TextEntry::make('category.name'),
+                                        \Filament\Infolists\Components\TextEntry::make('tags')
+                                            ->badge()
+                                            ->getStateUsing(fn () => self::$statuses),
+                                    ]),
+                                ]),
+                        ])->from('lg'),
+                    ])
+            ]);
+    }
+
+    /*public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                TextEntry::make('name'),
+                TextEntry::make('price'),
+                TextEntry::make('is_active'),
+                TextEntry::make('status'),
+            ]);
+    }*/
 }

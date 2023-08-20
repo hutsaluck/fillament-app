@@ -18,88 +18,92 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     private static array $statuses = [
-        'in stock' => 'in stock',
-        'sold out' => 'sold out',
+        'in stock'    => 'in stock',
+        'sold out'    => 'sold out',
         'coming soon' => 'coming soon',
     ];
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form( Form $form ): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+            ->schema( [
+                Forms\Components\TextInput::make( 'name' )
                     ->required(),
-                Forms\Components\TextInput::make('price')
+                Forms\Components\TextInput::make( 'price' )
                     ->required()
-                    ->rule('numeric'),
-                Forms\Components\Radio::make('status')
-                    ->options(self::$statuses),
-                Forms\Components\Select::make('category_id')
-                    ->relationship('category', 'name'),
-            ]);
+                    ->rule( 'numeric' ),
+                Forms\Components\Radio::make( 'status' )
+                    ->options( self::$statuses ),
+                Forms\Components\Select::make( 'category_id' )
+                    ->relationship( 'category', 'name' ),
+            ] );
     }
 
-    public static function table(Table $table): Table
+    public static function table( Table $table ): Table
     {
         return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
+            ->columns( [
+                Tables\Columns\TextColumn::make( 'name' )
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price')
+                Tables\Columns\TextColumn::make( 'price' )
                     ->sortable()
-                    ->money('usd')
-                    ->getStateUsing(function (Product $record): float {
+                    ->money( 'usd' )
+                    ->getStateUsing( function ( Product $record ): float {
                         return $record->price / 100;
-                    }),
-                Tables\Columns\TextColumn::make('status'),
-                Tables\Columns\TextColumn::make('category.name'),
-                Tables\Columns\TextColumn::make('tags.name'),
-            ])
-            ->defaultSort('price', 'desc')
-            ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->options(self::$statuses),
-                Tables\Filters\SelectFilter::make('category')
-                    ->relationship('category', 'name'),
-                Tables\Filters\Filter::make('created_from')
-                    ->form([
-                        Forms\Components\DatePicker::make('created_from'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    } ),
+                Tables\Columns\TextColumn::make( 'status' )
+                    ->badge(),
+                Tables\Columns\TextColumn::make( 'category.name' ),
+                Tables\Columns\TextColumn::make( 'tags.name' )
+                    ->badge(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->since(),
+            ] )
+            ->defaultSort( 'price', 'desc' )
+            ->filters( [
+                Tables\Filters\SelectFilter::make( 'status' )
+                    ->options( self::$statuses ),
+                Tables\Filters\SelectFilter::make( 'category' )
+                    ->relationship( 'category', 'name' ),
+                Tables\Filters\Filter::make( 'created_from' )
+                    ->form( [
+                        Forms\Components\DatePicker::make( 'created_from' ),
+                    ] )
+                    ->query( function ( Builder $query, array $data ): Builder {
                         return $query
                             ->when(
-                                $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                $data[ 'created_from' ],
+                                fn( Builder $query, $date ): Builder => $query->whereDate( 'created_at', '>=', $date ),
                             );
-                    }),
-                Tables\Filters\Filter::make('created_until')
-                    ->form([
-                        Forms\Components\DatePicker::make('created_until'),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
+                    } ),
+                Tables\Filters\Filter::make( 'created_until' )
+                    ->form( [
+                        Forms\Components\DatePicker::make( 'created_until' ),
+                    ] )
+                    ->query( function ( Builder $query, array $data ): Builder {
                         return $query
                             ->when(
-                                $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                $data[ 'created_until' ],
+                                fn( Builder $query, $date ): Builder => $query->whereDate( 'created_at', '<=', $date ),
                             );
-                    }),
-            ], Tables\Enums\FiltersLayout::AboveContent)
-            ->filtersFormColumns(4)
-            ->actions([
+                    } ),
+            ], Tables\Enums\FiltersLayout::AboveContent )
+            ->filtersFormColumns( 4 )
+            ->actions( [
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ] )
+            ->bulkActions( [
+                Tables\Actions\BulkActionGroup::make( [
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ])
-            ->emptyStateActions([
+                ] ),
+            ] )
+            ->emptyStateActions( [
                 Tables\Actions\CreateAction::make(),
-            ]);
+            ] );
     }
 
     public static function getRelations(): array
@@ -112,9 +116,9 @@ class ProductResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListProducts::route('/'),
-            'create' => Pages\CreateProduct::route('/create'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'index'  => Pages\ListProducts::route( '/' ),
+            'create' => Pages\CreateProduct::route( '/create' ),
+            'edit'   => Pages\EditProduct::route( '/{record}/edit' ),
         ];
     }
 }

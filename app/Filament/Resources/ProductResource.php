@@ -17,6 +17,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
+
     protected static ?int $navigationSort = 2;
 
     private static array $statuses = [
@@ -32,7 +33,7 @@ class ProductResource extends Resource
         return $form
             ->schema( [
                 Forms\Components\Wizard::make([
-                    Forms\Components\Wizard\Step::make('Main data')
+                    Forms\Components\Wizard\Step::make(__('Main data'))
                         ->schema([
                             Forms\Components\TextInput::make('name')
                                 ->required()
@@ -40,7 +41,7 @@ class ProductResource extends Resource
                             Forms\Components\TextInput::make('price')
                                 ->required(),
                         ]),
-                    Forms\Components\Wizard\Step::make('Additional data')
+                    Forms\Components\Wizard\Step::make(__('Additional data'))
                         ->schema([
                             Forms\Components\Radio::make('status')
                                 ->options(self::$statuses),
@@ -57,6 +58,7 @@ class ProductResource extends Resource
         return $table
             ->columns( [
                 Tables\Columns\TextInputColumn::make( 'name' )
+                    ->label(__('Product name'))
                     ->rules(['required', 'min:3'])
                     ->sortable()
                     ->searchable(),
@@ -135,5 +137,10 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route( '/create' ),
             'edit'   => Pages\EditProduct::route( '/{record}/edit' ),
         ];
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Products');
     }
 }

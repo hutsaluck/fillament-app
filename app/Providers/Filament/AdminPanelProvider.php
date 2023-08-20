@@ -24,6 +24,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->id('admin')
             ->path('panel')
             ->login()
@@ -64,5 +65,6 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
     }
 }

@@ -14,11 +14,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use \Filament\Infolists\Infolist;
 use \Filament\Infolists\Components\TextEntry;
+use \Illuminate\Database\Eloquent\Model;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static int $globalSearchResultsLimit = 3;
 
     protected static ?int $navigationSort = 2;
 
@@ -179,6 +183,11 @@ class ProductResource extends Resource
                         ])->from('lg'),
                     ])
             ]);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record): string
+    {
+        return self::getUrl('view', ['record' => $record]);
     }
 
     /*public static function infolist(Infolist $infolist): Infolist

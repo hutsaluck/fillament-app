@@ -38,25 +38,31 @@ class ProductResource extends Resource
     {
         return $form
             ->schema( [
-                Forms\Components\Wizard::make([
-                    Forms\Components\Wizard\Step::make(__('Main data'))
-                        ->schema([
-                            Forms\Components\TextInput::make('name')
+                Forms\Components\Wizard::make( [
+                    Forms\Components\Wizard\Step::make( __( 'Main data' ) )
+                        ->schema( [
+                            Forms\Components\TextInput::make( 'name' )
                                 ->required()
-                                ->unique(ignoreRecord: true),
-                            Forms\Components\TextInput::make('price')
+                                ->unique( ignoreRecord: true )
+                                ->live( onBlur: true )
+                                ->afterStateUpdated( fn( Forms\Set $set, ?string $state ) => $set( 'slug', str()->slug( $state ) ) ),
+                            Forms\Components\TextInput::make( 'slug' )
+                                ->hiddenOn('edit')
+                                ->disabledOn('edit')
                                 ->required(),
-                        ]),
-                    Forms\Components\Wizard\Step::make(__('Additional data'))
-                        ->schema([
-                            Forms\Components\Radio::make('status')
-                                ->options(self::$statuses),
-                            Forms\Components\Select::make('category_id')
-                                ->relationship('category', 'name'),
-                        ]),
-                ])
+                            Forms\Components\TextInput::make( 'price' )
+                                ->required(),
+                        ] ),
+                    Forms\Components\Wizard\Step::make( __( 'Additional data' ) )
+                        ->schema( [
+                            Forms\Components\Radio::make( 'status' )
+                                ->options( self::$statuses ),
+                            Forms\Components\Select::make( 'category_id' )
+                                ->relationship( 'category', 'name' ),
+                        ] ),
+                ] )
             ] )
-            ->columns(1);
+            ->columns( 1 );
     }
 
     public static function table( Table $table ): Table
@@ -64,8 +70,8 @@ class ProductResource extends Resource
         return $table
             ->columns( [
                 Tables\Columns\TextInputColumn::make( 'name' )
-                    ->label(__('Product name'))
-                    ->rules(['required', 'min:3'])
+                    ->label( __( 'Product name' ) )
+                    ->rules( [ 'required', 'min:3' ] )
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make( 'price' )
@@ -74,15 +80,15 @@ class ProductResource extends Resource
                     ->getStateUsing( function ( Product $record ): float {
                         return $record->price / 100;
                     } ),
-                Tables\Columns\ToggleColumn::make('is_active')
-                    ->onColor('success') // default value: "primary"
-                    ->offColor('danger'), // default value: "gray",
+                Tables\Columns\ToggleColumn::make( 'is_active' )
+                    ->onColor( 'success' ) // default value: "primary"
+                    ->offColor( 'danger' ), // default value: "gray",
                 Tables\Columns\SelectColumn::make( 'status' )
-                    ->options(self::$statuses),
+                    ->options( self::$statuses ),
                 Tables\Columns\TextColumn::make( 'category.name' ),
                 Tables\Columns\TextColumn::make( 'tags.name' )
                     ->badge(),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make( 'created_at' )
                     ->since(),
             ] )
             ->defaultSort( 'price', 'desc' )
@@ -143,51 +149,52 @@ class ProductResource extends Resource
             'index'  => Pages\ListProducts::route( '/' ),
             'create' => Pages\CreateProduct::route( '/create' ),
             'edit'   => Pages\EditProduct::route( '/{record}/edit' ),
-            'view' => Pages\ViewProduct::route('/{record}'),
+            'view'   => Pages\ViewProduct::route( '/{record}' ),
         ];
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Products');
+        return __( 'Products' );
     }
-    public static function infolist(Infolist $infolist): Infolist
+
+    public static function infolist( Infolist $infolist ): Infolist
     {
         return $infolist
-            ->schema([
+            ->schema( [
                 \Filament\Infolists\Components\Section::make()
-                    ->schema([
-                        \Filament\Infolists\Components\Split::make([
-                            \Filament\Infolists\Components\Grid::make(2)
-                                ->schema([
-                                    \Filament\Infolists\Components\Group::make([
-                                        \Filament\Infolists\Components\TextEntry::make('name'),
-                                        \Filament\Infolists\Components\TextEntry::make('price')
+                    ->schema( [
+                        \Filament\Infolists\Components\Split::make( [
+                            \Filament\Infolists\Components\Grid::make( 2 )
+                                ->schema( [
+                                    \Filament\Infolists\Components\Group::make( [
+                                        \Filament\Infolists\Components\TextEntry::make( 'name' ),
+                                        \Filament\Infolists\Components\TextEntry::make( 'price' )
                                             ->money( 'usd' )
                                             ->getStateUsing( function ( Product $record ): float {
                                                 return $record->price / 100;
                                             } ),
-                                        \Filament\Infolists\Components\TextEntry::make('created_at')
+                                        \Filament\Infolists\Components\TextEntry::make( 'created_at' )
                                             ->badge()
                                             ->date()
-                                            ->color('success'),
-                                    ]),
-                                    \Filament\Infolists\Components\Group::make([
-                                        \Filament\Infolists\Components\TextEntry::make('status'),
-                                        \Filament\Infolists\Components\TextEntry::make('category.name'),
-                                        \Filament\Infolists\Components\TextEntry::make('tags')
+                                            ->color( 'success' ),
+                                    ] ),
+                                    \Filament\Infolists\Components\Group::make( [
+                                        \Filament\Infolists\Components\TextEntry::make( 'status' ),
+                                        \Filament\Infolists\Components\TextEntry::make( 'category.name' ),
+                                        \Filament\Infolists\Components\TextEntry::make( 'tags' )
                                             ->badge()
-                                            ->getStateUsing(fn () => self::$statuses),
-                                    ]),
-                                ]),
-                        ])->from('lg'),
-                    ])
-            ]);
+                                            ->getStateUsing( fn() => self::$statuses ),
+                                    ] ),
+                                ] ),
+                        ] )->from( 'lg' ),
+                    ] )
+            ] );
     }
 
-    public static function getGlobalSearchResultUrl(Model $record): string
+    public static function getGlobalSearchResultUrl( Model $record ): string
     {
-        return self::getUrl('view', ['record' => $record]);
+        return self::getUrl( 'view', [ 'record' => $record ] );
     }
 
     /*public static function infolist(Infolist $infolist): Infolist

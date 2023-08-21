@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Models\Company;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -19,36 +18,29 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
-class AdminPanelProvider extends PanelProvider
+class AccountantPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            ->id('admin')
-            ->path('panel')
+            ->id('accountant')
+            ->path('accountant')
             ->login()
-            ->registration()
-            ->passwordReset()
-            ->emailVerification()
-            ->profile()
+            ->brandName('Accounting Interface')
             ->colors([
-                'danger' => Color::Rose,
-                'gray' => Color::Gray,
-                'info' => Color::Blue,
-                'primary' => Color::Indigo,
-                'success' => Color::Emerald,
-                'warning' => Color::Orange,
+                'primary' => Color::Green,
             ])
-            ->font('Comic Neue')
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->topNavigation()
+            ->discoverResources(in: app_path('Filament/Accountant/Resources'), for: 'App\\Filament\\Accountant\\Resources')
+            ->discoverPages(in: app_path('Filament/Accountant/Pages'), for: 'App\\Filament\\Accountant\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([])
+            ->discoverWidgets(in: app_path('Filament/Accountant/Widgets'), for: 'App\\Filament\\Accountant\\Widgets')
+            ->widgets([
+                Widgets\AccountWidget::class,
+                Widgets\FilamentInfoWidget::class,
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -63,6 +55,5 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
-
     }
 }
